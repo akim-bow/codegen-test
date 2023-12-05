@@ -1,0 +1,1719 @@
+"""
+Marks the GraphQL type as indexable entity.  Each type that should be an entity
+is required to be annotated with this directive.
+"""
+directive @entity on OBJECT
+
+"""Defined a Subgraph ID for an object type"""
+directive @subgraphId(id: String!) on OBJECT
+
+"""
+creates a virtual field on the entity that may be queried but cannot be set manually through the mappings API.
+"""
+directive @derivedFrom(field: String!) on FIELD_DEFINITION
+
+type _Block_ {
+  """The hash of the block"""
+  hash: Bytes
+
+  """The block number"""
+  number: Int!
+
+  """Integer representation of the timestamp stored in blocks for the chain"""
+  timestamp: Int
+}
+
+"""The type for the top-level _meta field"""
+type _Meta_ {
+  """
+  Information about a specific subgraph block. The hash of the block
+  will be null if the _meta field has a block constraint that asks for
+  a block number. It will be filled if the _meta field has no block constraint
+  and therefore asks for the latest  block
+  
+  """
+  block: _Block_!
+
+  """The deployment ID"""
+  deployment: String!
+
+  """If `true`, the subgraph encountered indexing errors at some past block"""
+  hasIndexingErrors: Boolean!
+}
+
+enum _SubgraphErrorPolicy_ {
+  """Data will be returned even if the subgraph has indexing errors"""
+  allow
+
+  """
+  If the subgraph has indexing errors, data will be omitted. The default.
+  """
+  deny
+}
+
+scalar BigDecimal
+
+scalar BigInt
+
+input Block_height {
+  hash: Bytes
+  number: Int
+  number_gte: Int
+}
+
+input BlockChangedFilter {
+  number_gte: Int!
+}
+
+scalar Bytes
+
+type ComputeUnit {
+  id: ID!
+  peer: Peer!
+
+  """In order to simplify relation."""
+  provider: Provider!
+  deal: Deal
+  workerId: String
+}
+
+input ComputeUnit_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  peer: String
+  peer_not: String
+  peer_gt: String
+  peer_lt: String
+  peer_gte: String
+  peer_lte: String
+  peer_in: [String!]
+  peer_not_in: [String!]
+  peer_contains: String
+  peer_contains_nocase: String
+  peer_not_contains: String
+  peer_not_contains_nocase: String
+  peer_starts_with: String
+  peer_starts_with_nocase: String
+  peer_not_starts_with: String
+  peer_not_starts_with_nocase: String
+  peer_ends_with: String
+  peer_ends_with_nocase: String
+  peer_not_ends_with: String
+  peer_not_ends_with_nocase: String
+  peer_: Peer_filter
+  provider: String
+  provider_not: String
+  provider_gt: String
+  provider_lt: String
+  provider_gte: String
+  provider_lte: String
+  provider_in: [String!]
+  provider_not_in: [String!]
+  provider_contains: String
+  provider_contains_nocase: String
+  provider_not_contains: String
+  provider_not_contains_nocase: String
+  provider_starts_with: String
+  provider_starts_with_nocase: String
+  provider_not_starts_with: String
+  provider_not_starts_with_nocase: String
+  provider_ends_with: String
+  provider_ends_with_nocase: String
+  provider_not_ends_with: String
+  provider_not_ends_with_nocase: String
+  provider_: Provider_filter
+  deal: String
+  deal_not: String
+  deal_gt: String
+  deal_lt: String
+  deal_gte: String
+  deal_lte: String
+  deal_in: [String!]
+  deal_not_in: [String!]
+  deal_contains: String
+  deal_contains_nocase: String
+  deal_not_contains: String
+  deal_not_contains_nocase: String
+  deal_starts_with: String
+  deal_starts_with_nocase: String
+  deal_not_starts_with: String
+  deal_not_starts_with_nocase: String
+  deal_ends_with: String
+  deal_ends_with_nocase: String
+  deal_not_ends_with: String
+  deal_not_ends_with_nocase: String
+  deal_: Deal_filter
+  workerId: String
+  workerId_not: String
+  workerId_gt: String
+  workerId_lt: String
+  workerId_gte: String
+  workerId_lte: String
+  workerId_in: [String!]
+  workerId_not_in: [String!]
+  workerId_contains: String
+  workerId_contains_nocase: String
+  workerId_not_contains: String
+  workerId_not_contains_nocase: String
+  workerId_starts_with: String
+  workerId_starts_with_nocase: String
+  workerId_not_starts_with: String
+  workerId_not_starts_with_nocase: String
+  workerId_ends_with: String
+  workerId_ends_with_nocase: String
+  workerId_not_ends_with: String
+  workerId_not_ends_with_nocase: String
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [ComputeUnit_filter]
+  or: [ComputeUnit_filter]
+}
+
+enum ComputeUnit_orderBy {
+  id
+  peer
+  peer__id
+  provider
+  provider__id
+  provider__name
+  provider__createdAt
+  provider__computeUnitsAvailable
+  provider__computeUnitsTotal
+  provider__peerCount
+  provider__effectorCount
+  deal
+  deal__id
+  deal__appCID
+  deal__createdAt
+  deal__owner
+  deal__minWorkers
+  deal__targetWorkers
+  deal__maxWorkersPerProvider
+  deal__pricePerWorkerEpoch
+  deal__withdrawalSum
+  deal__depositedSum
+  deal__maxPaidEpoch
+  workerId
+}
+
+type Deal {
+  id: ID!
+  appCID: String!
+  createdAt: BigInt!
+  owner: Bytes!
+  minWorkers: Int!
+  targetWorkers: Int!
+  maxWorkersPerProvider: Int!
+  paymentToken: Token!
+  pricePerWorkerEpoch: BigInt!
+  effectors(skip: Int = 0, first: Int = 100, orderBy: DealToEffector_orderBy, orderDirection: OrderDirection, where: DealToEffector_filter): [DealToEffector!]
+  withdrawalSum: BigInt!
+  depositedSum: BigInt!
+  maxPaidEpoch: BigInt
+
+  """I.e. Matching Result (Figma)."""
+  addedComputeUnits(skip: Int = 0, first: Int = 100, orderBy: ComputeUnit_orderBy, orderDirection: OrderDirection, where: ComputeUnit_filter): [ComputeUnit!]
+}
+
+input Deal_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  appCID: String
+  appCID_not: String
+  appCID_gt: String
+  appCID_lt: String
+  appCID_gte: String
+  appCID_lte: String
+  appCID_in: [String!]
+  appCID_not_in: [String!]
+  appCID_contains: String
+  appCID_contains_nocase: String
+  appCID_not_contains: String
+  appCID_not_contains_nocase: String
+  appCID_starts_with: String
+  appCID_starts_with_nocase: String
+  appCID_not_starts_with: String
+  appCID_not_starts_with_nocase: String
+  appCID_ends_with: String
+  appCID_ends_with_nocase: String
+  appCID_not_ends_with: String
+  appCID_not_ends_with_nocase: String
+  createdAt: BigInt
+  createdAt_not: BigInt
+  createdAt_gt: BigInt
+  createdAt_lt: BigInt
+  createdAt_gte: BigInt
+  createdAt_lte: BigInt
+  createdAt_in: [BigInt!]
+  createdAt_not_in: [BigInt!]
+  owner: Bytes
+  owner_not: Bytes
+  owner_gt: Bytes
+  owner_lt: Bytes
+  owner_gte: Bytes
+  owner_lte: Bytes
+  owner_in: [Bytes!]
+  owner_not_in: [Bytes!]
+  owner_contains: Bytes
+  owner_not_contains: Bytes
+  minWorkers: Int
+  minWorkers_not: Int
+  minWorkers_gt: Int
+  minWorkers_lt: Int
+  minWorkers_gte: Int
+  minWorkers_lte: Int
+  minWorkers_in: [Int!]
+  minWorkers_not_in: [Int!]
+  targetWorkers: Int
+  targetWorkers_not: Int
+  targetWorkers_gt: Int
+  targetWorkers_lt: Int
+  targetWorkers_gte: Int
+  targetWorkers_lte: Int
+  targetWorkers_in: [Int!]
+  targetWorkers_not_in: [Int!]
+  maxWorkersPerProvider: Int
+  maxWorkersPerProvider_not: Int
+  maxWorkersPerProvider_gt: Int
+  maxWorkersPerProvider_lt: Int
+  maxWorkersPerProvider_gte: Int
+  maxWorkersPerProvider_lte: Int
+  maxWorkersPerProvider_in: [Int!]
+  maxWorkersPerProvider_not_in: [Int!]
+  paymentToken: String
+  paymentToken_not: String
+  paymentToken_gt: String
+  paymentToken_lt: String
+  paymentToken_gte: String
+  paymentToken_lte: String
+  paymentToken_in: [String!]
+  paymentToken_not_in: [String!]
+  paymentToken_contains: String
+  paymentToken_contains_nocase: String
+  paymentToken_not_contains: String
+  paymentToken_not_contains_nocase: String
+  paymentToken_starts_with: String
+  paymentToken_starts_with_nocase: String
+  paymentToken_not_starts_with: String
+  paymentToken_not_starts_with_nocase: String
+  paymentToken_ends_with: String
+  paymentToken_ends_with_nocase: String
+  paymentToken_not_ends_with: String
+  paymentToken_not_ends_with_nocase: String
+  paymentToken_: Token_filter
+  pricePerWorkerEpoch: BigInt
+  pricePerWorkerEpoch_not: BigInt
+  pricePerWorkerEpoch_gt: BigInt
+  pricePerWorkerEpoch_lt: BigInt
+  pricePerWorkerEpoch_gte: BigInt
+  pricePerWorkerEpoch_lte: BigInt
+  pricePerWorkerEpoch_in: [BigInt!]
+  pricePerWorkerEpoch_not_in: [BigInt!]
+  effectors_: DealToEffector_filter
+  withdrawalSum: BigInt
+  withdrawalSum_not: BigInt
+  withdrawalSum_gt: BigInt
+  withdrawalSum_lt: BigInt
+  withdrawalSum_gte: BigInt
+  withdrawalSum_lte: BigInt
+  withdrawalSum_in: [BigInt!]
+  withdrawalSum_not_in: [BigInt!]
+  depositedSum: BigInt
+  depositedSum_not: BigInt
+  depositedSum_gt: BigInt
+  depositedSum_lt: BigInt
+  depositedSum_gte: BigInt
+  depositedSum_lte: BigInt
+  depositedSum_in: [BigInt!]
+  depositedSum_not_in: [BigInt!]
+  maxPaidEpoch: BigInt
+  maxPaidEpoch_not: BigInt
+  maxPaidEpoch_gt: BigInt
+  maxPaidEpoch_lt: BigInt
+  maxPaidEpoch_gte: BigInt
+  maxPaidEpoch_lte: BigInt
+  maxPaidEpoch_in: [BigInt!]
+  maxPaidEpoch_not_in: [BigInt!]
+  addedComputeUnits_: ComputeUnit_filter
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [Deal_filter]
+  or: [Deal_filter]
+}
+
+enum Deal_orderBy {
+  id
+  appCID
+  createdAt
+  owner
+  minWorkers
+  targetWorkers
+  maxWorkersPerProvider
+  paymentToken
+  paymentToken__id
+  paymentToken__symbol
+  pricePerWorkerEpoch
+  effectors
+  withdrawalSum
+  depositedSum
+  maxPaidEpoch
+  addedComputeUnits
+}
+
+type DealToEffector {
+  id: ID!
+  deal: Deal!
+  effector: Effector!
+}
+
+input DealToEffector_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  deal: String
+  deal_not: String
+  deal_gt: String
+  deal_lt: String
+  deal_gte: String
+  deal_lte: String
+  deal_in: [String!]
+  deal_not_in: [String!]
+  deal_contains: String
+  deal_contains_nocase: String
+  deal_not_contains: String
+  deal_not_contains_nocase: String
+  deal_starts_with: String
+  deal_starts_with_nocase: String
+  deal_not_starts_with: String
+  deal_not_starts_with_nocase: String
+  deal_ends_with: String
+  deal_ends_with_nocase: String
+  deal_not_ends_with: String
+  deal_not_ends_with_nocase: String
+  deal_: Deal_filter
+  effector: String
+  effector_not: String
+  effector_gt: String
+  effector_lt: String
+  effector_gte: String
+  effector_lte: String
+  effector_in: [String!]
+  effector_not_in: [String!]
+  effector_contains: String
+  effector_contains_nocase: String
+  effector_not_contains: String
+  effector_not_contains_nocase: String
+  effector_starts_with: String
+  effector_starts_with_nocase: String
+  effector_not_starts_with: String
+  effector_not_starts_with_nocase: String
+  effector_ends_with: String
+  effector_ends_with_nocase: String
+  effector_not_ends_with: String
+  effector_not_ends_with_nocase: String
+  effector_: Effector_filter
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [DealToEffector_filter]
+  or: [DealToEffector_filter]
+}
+
+enum DealToEffector_orderBy {
+  id
+  deal
+  deal__id
+  deal__appCID
+  deal__createdAt
+  deal__owner
+  deal__minWorkers
+  deal__targetWorkers
+  deal__maxWorkersPerProvider
+  deal__pricePerWorkerEpoch
+  deal__withdrawalSum
+  deal__depositedSum
+  deal__maxPaidEpoch
+  effector
+  effector__id
+  effector__description
+}
+
+"""Effector table is obsolete table since it is a simple mapping."""
+type Effector {
+  """id and CID are the same."""
+  id: ID!
+  description: String!
+  offers(skip: Int = 0, first: Int = 100, orderBy: OfferToEffector_orderBy, orderDirection: OrderDirection, where: OfferToEffector_filter): [OfferToEffector!]
+}
+
+input Effector_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  description: String
+  description_not: String
+  description_gt: String
+  description_lt: String
+  description_gte: String
+  description_lte: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_contains: String
+  description_contains_nocase: String
+  description_not_contains: String
+  description_not_contains_nocase: String
+  description_starts_with: String
+  description_starts_with_nocase: String
+  description_not_starts_with: String
+  description_not_starts_with_nocase: String
+  description_ends_with: String
+  description_ends_with_nocase: String
+  description_not_ends_with: String
+  description_not_ends_with_nocase: String
+  offers_: OfferToEffector_filter
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [Effector_filter]
+  or: [Effector_filter]
+}
+
+enum Effector_orderBy {
+  id
+  description
+  offers
+}
+
+"""
+8 bytes signed integer
+
+"""
+scalar Int8
+
+type Offer {
+  """
+  Used in the next figma views:
+  - Offer from List Of offers 1.2.
+  - Offer 1.2
+  
+  """
+  id: ID!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  provider: Provider!
+  pricePerEpoch: BigInt!
+  paymentToken: Token!
+  peers(skip: Int = 0, first: Int = 100, orderBy: Peer_orderBy, orderDirection: OrderDirection, where: Peer_filter): [Peer!]
+  effectors(skip: Int = 0, first: Int = 100, orderBy: OfferToEffector_orderBy, orderDirection: OrderDirection, where: OfferToEffector_filter): [OfferToEffector!]
+  computeUnitsAvailable: Int
+  computeUnitsTotal: Int
+}
+
+input Offer_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  createdAt: BigInt
+  createdAt_not: BigInt
+  createdAt_gt: BigInt
+  createdAt_lt: BigInt
+  createdAt_gte: BigInt
+  createdAt_lte: BigInt
+  createdAt_in: [BigInt!]
+  createdAt_not_in: [BigInt!]
+  updatedAt: BigInt
+  updatedAt_not: BigInt
+  updatedAt_gt: BigInt
+  updatedAt_lt: BigInt
+  updatedAt_gte: BigInt
+  updatedAt_lte: BigInt
+  updatedAt_in: [BigInt!]
+  updatedAt_not_in: [BigInt!]
+  provider: String
+  provider_not: String
+  provider_gt: String
+  provider_lt: String
+  provider_gte: String
+  provider_lte: String
+  provider_in: [String!]
+  provider_not_in: [String!]
+  provider_contains: String
+  provider_contains_nocase: String
+  provider_not_contains: String
+  provider_not_contains_nocase: String
+  provider_starts_with: String
+  provider_starts_with_nocase: String
+  provider_not_starts_with: String
+  provider_not_starts_with_nocase: String
+  provider_ends_with: String
+  provider_ends_with_nocase: String
+  provider_not_ends_with: String
+  provider_not_ends_with_nocase: String
+  provider_: Provider_filter
+  pricePerEpoch: BigInt
+  pricePerEpoch_not: BigInt
+  pricePerEpoch_gt: BigInt
+  pricePerEpoch_lt: BigInt
+  pricePerEpoch_gte: BigInt
+  pricePerEpoch_lte: BigInt
+  pricePerEpoch_in: [BigInt!]
+  pricePerEpoch_not_in: [BigInt!]
+  paymentToken: String
+  paymentToken_not: String
+  paymentToken_gt: String
+  paymentToken_lt: String
+  paymentToken_gte: String
+  paymentToken_lte: String
+  paymentToken_in: [String!]
+  paymentToken_not_in: [String!]
+  paymentToken_contains: String
+  paymentToken_contains_nocase: String
+  paymentToken_not_contains: String
+  paymentToken_not_contains_nocase: String
+  paymentToken_starts_with: String
+  paymentToken_starts_with_nocase: String
+  paymentToken_not_starts_with: String
+  paymentToken_not_starts_with_nocase: String
+  paymentToken_ends_with: String
+  paymentToken_ends_with_nocase: String
+  paymentToken_not_ends_with: String
+  paymentToken_not_ends_with_nocase: String
+  paymentToken_: Token_filter
+  peers_: Peer_filter
+  effectors_: OfferToEffector_filter
+  computeUnitsAvailable: Int
+  computeUnitsAvailable_not: Int
+  computeUnitsAvailable_gt: Int
+  computeUnitsAvailable_lt: Int
+  computeUnitsAvailable_gte: Int
+  computeUnitsAvailable_lte: Int
+  computeUnitsAvailable_in: [Int!]
+  computeUnitsAvailable_not_in: [Int!]
+  computeUnitsTotal: Int
+  computeUnitsTotal_not: Int
+  computeUnitsTotal_gt: Int
+  computeUnitsTotal_lt: Int
+  computeUnitsTotal_gte: Int
+  computeUnitsTotal_lte: Int
+  computeUnitsTotal_in: [Int!]
+  computeUnitsTotal_not_in: [Int!]
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [Offer_filter]
+  or: [Offer_filter]
+}
+
+enum Offer_orderBy {
+  id
+  createdAt
+  updatedAt
+  provider
+  provider__id
+  provider__name
+  provider__createdAt
+  provider__computeUnitsAvailable
+  provider__computeUnitsTotal
+  provider__peerCount
+  provider__effectorCount
+  pricePerEpoch
+  paymentToken
+  paymentToken__id
+  paymentToken__symbol
+  peers
+  effectors
+  computeUnitsAvailable
+  computeUnitsTotal
+}
+
+"""
+To support many2many b/w offer and effector.
+E.g. to use
+{
+  offers {
+    effectors {
+      effector {
+        description
+      }
+    }
+  }
+}
+
+"""
+type OfferToEffector {
+  id: ID!
+  offer: Offer!
+  effector: Effector!
+}
+
+input OfferToEffector_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  offer: String
+  offer_not: String
+  offer_gt: String
+  offer_lt: String
+  offer_gte: String
+  offer_lte: String
+  offer_in: [String!]
+  offer_not_in: [String!]
+  offer_contains: String
+  offer_contains_nocase: String
+  offer_not_contains: String
+  offer_not_contains_nocase: String
+  offer_starts_with: String
+  offer_starts_with_nocase: String
+  offer_not_starts_with: String
+  offer_not_starts_with_nocase: String
+  offer_ends_with: String
+  offer_ends_with_nocase: String
+  offer_not_ends_with: String
+  offer_not_ends_with_nocase: String
+  offer_: Offer_filter
+  effector: String
+  effector_not: String
+  effector_gt: String
+  effector_lt: String
+  effector_gte: String
+  effector_lte: String
+  effector_in: [String!]
+  effector_not_in: [String!]
+  effector_contains: String
+  effector_contains_nocase: String
+  effector_not_contains: String
+  effector_not_contains_nocase: String
+  effector_starts_with: String
+  effector_starts_with_nocase: String
+  effector_not_starts_with: String
+  effector_not_starts_with_nocase: String
+  effector_ends_with: String
+  effector_ends_with_nocase: String
+  effector_not_ends_with: String
+  effector_not_ends_with_nocase: String
+  effector_: Effector_filter
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [OfferToEffector_filter]
+  or: [OfferToEffector_filter]
+}
+
+enum OfferToEffector_orderBy {
+  id
+  offer
+  offer__id
+  offer__createdAt
+  offer__updatedAt
+  offer__pricePerEpoch
+  offer__computeUnitsAvailable
+  offer__computeUnitsTotal
+  effector
+  effector__id
+  effector__description
+}
+
+"""Defines the order direction, either ascending or descending"""
+enum OrderDirection {
+  asc
+  desc
+}
+
+type Peer {
+  """ref to peerId in contract."""
+  id: ID!
+  offer: Offer!
+  provider: Provider!
+  computeUnits(skip: Int = 0, first: Int = 100, orderBy: ComputeUnit_orderBy, orderDirection: OrderDirection, where: ComputeUnit_filter): [ComputeUnit!]
+}
+
+input Peer_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  offer: String
+  offer_not: String
+  offer_gt: String
+  offer_lt: String
+  offer_gte: String
+  offer_lte: String
+  offer_in: [String!]
+  offer_not_in: [String!]
+  offer_contains: String
+  offer_contains_nocase: String
+  offer_not_contains: String
+  offer_not_contains_nocase: String
+  offer_starts_with: String
+  offer_starts_with_nocase: String
+  offer_not_starts_with: String
+  offer_not_starts_with_nocase: String
+  offer_ends_with: String
+  offer_ends_with_nocase: String
+  offer_not_ends_with: String
+  offer_not_ends_with_nocase: String
+  offer_: Offer_filter
+  provider: String
+  provider_not: String
+  provider_gt: String
+  provider_lt: String
+  provider_gte: String
+  provider_lte: String
+  provider_in: [String!]
+  provider_not_in: [String!]
+  provider_contains: String
+  provider_contains_nocase: String
+  provider_not_contains: String
+  provider_not_contains_nocase: String
+  provider_starts_with: String
+  provider_starts_with_nocase: String
+  provider_not_starts_with: String
+  provider_not_starts_with_nocase: String
+  provider_ends_with: String
+  provider_ends_with_nocase: String
+  provider_not_ends_with: String
+  provider_not_ends_with_nocase: String
+  provider_: Provider_filter
+  computeUnits_: ComputeUnit_filter
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [Peer_filter]
+  or: [Peer_filter]
+}
+
+enum Peer_orderBy {
+  id
+  offer
+  offer__id
+  offer__createdAt
+  offer__updatedAt
+  offer__pricePerEpoch
+  offer__computeUnitsAvailable
+  offer__computeUnitsTotal
+  provider
+  provider__id
+  provider__name
+  provider__createdAt
+  provider__computeUnitsAvailable
+  provider__computeUnitsTotal
+  provider__peerCount
+  provider__effectorCount
+  computeUnits
+}
+
+type Provider {
+  id: ID!
+  name: String!
+  createdAt: BigInt!
+  offers(skip: Int = 0, first: Int = 100, orderBy: Offer_orderBy, orderDirection: OrderDirection, where: Offer_filter): [Offer!]
+  computeUnitsAvailable: Int!
+  computeUnitsTotal: Int!
+  peerCount: Int!
+  effectorCount: Int!
+}
+
+input Provider_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  name: String
+  name_not: String
+  name_gt: String
+  name_lt: String
+  name_gte: String
+  name_lte: String
+  name_in: [String!]
+  name_not_in: [String!]
+  name_contains: String
+  name_contains_nocase: String
+  name_not_contains: String
+  name_not_contains_nocase: String
+  name_starts_with: String
+  name_starts_with_nocase: String
+  name_not_starts_with: String
+  name_not_starts_with_nocase: String
+  name_ends_with: String
+  name_ends_with_nocase: String
+  name_not_ends_with: String
+  name_not_ends_with_nocase: String
+  createdAt: BigInt
+  createdAt_not: BigInt
+  createdAt_gt: BigInt
+  createdAt_lt: BigInt
+  createdAt_gte: BigInt
+  createdAt_lte: BigInt
+  createdAt_in: [BigInt!]
+  createdAt_not_in: [BigInt!]
+  offers_: Offer_filter
+  computeUnitsAvailable: Int
+  computeUnitsAvailable_not: Int
+  computeUnitsAvailable_gt: Int
+  computeUnitsAvailable_lt: Int
+  computeUnitsAvailable_gte: Int
+  computeUnitsAvailable_lte: Int
+  computeUnitsAvailable_in: [Int!]
+  computeUnitsAvailable_not_in: [Int!]
+  computeUnitsTotal: Int
+  computeUnitsTotal_not: Int
+  computeUnitsTotal_gt: Int
+  computeUnitsTotal_lt: Int
+  computeUnitsTotal_gte: Int
+  computeUnitsTotal_lte: Int
+  computeUnitsTotal_in: [Int!]
+  computeUnitsTotal_not_in: [Int!]
+  peerCount: Int
+  peerCount_not: Int
+  peerCount_gt: Int
+  peerCount_lt: Int
+  peerCount_gte: Int
+  peerCount_lte: Int
+  peerCount_in: [Int!]
+  peerCount_not_in: [Int!]
+  effectorCount: Int
+  effectorCount_not: Int
+  effectorCount_gt: Int
+  effectorCount_lt: Int
+  effectorCount_gte: Int
+  effectorCount_lte: Int
+  effectorCount_in: [Int!]
+  effectorCount_not_in: [Int!]
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [Provider_filter]
+  or: [Provider_filter]
+}
+
+enum Provider_orderBy {
+  id
+  name
+  createdAt
+  offers
+  computeUnitsAvailable
+  computeUnitsTotal
+  peerCount
+  effectorCount
+}
+
+type Query {
+  token(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Token
+  tokens(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Token_orderBy
+    orderDirection: OrderDirection
+    where: Token_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Token!]!
+  provider(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Provider
+  providers(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Provider_orderBy
+    orderDirection: OrderDirection
+    where: Provider_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Provider!]!
+  offer(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Offer
+  offers(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Offer_orderBy
+    orderDirection: OrderDirection
+    where: Offer_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Offer!]!
+  offerToEffector(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): OfferToEffector
+  offerToEffectors(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: OfferToEffector_orderBy
+    orderDirection: OrderDirection
+    where: OfferToEffector_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [OfferToEffector!]!
+  effector(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Effector
+  effectors(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Effector_orderBy
+    orderDirection: OrderDirection
+    where: Effector_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Effector!]!
+  peer(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Peer
+  peers(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Peer_orderBy
+    orderDirection: OrderDirection
+    where: Peer_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Peer!]!
+  computeUnit(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): ComputeUnit
+  computeUnits(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: ComputeUnit_orderBy
+    orderDirection: OrderDirection
+    where: ComputeUnit_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [ComputeUnit!]!
+  dealToEffector(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): DealToEffector
+  dealToEffectors(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: DealToEffector_orderBy
+    orderDirection: OrderDirection
+    where: DealToEffector_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [DealToEffector!]!
+  deal(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Deal
+  deals(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Deal_orderBy
+    orderDirection: OrderDirection
+    where: Deal_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Deal!]!
+
+  """Access to subgraph metadata"""
+  _meta(block: Block_height): _Meta_
+}
+
+type Subscription {
+  token(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Token
+  tokens(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Token_orderBy
+    orderDirection: OrderDirection
+    where: Token_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Token!]!
+  provider(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Provider
+  providers(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Provider_orderBy
+    orderDirection: OrderDirection
+    where: Provider_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Provider!]!
+  offer(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Offer
+  offers(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Offer_orderBy
+    orderDirection: OrderDirection
+    where: Offer_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Offer!]!
+  offerToEffector(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): OfferToEffector
+  offerToEffectors(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: OfferToEffector_orderBy
+    orderDirection: OrderDirection
+    where: OfferToEffector_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [OfferToEffector!]!
+  effector(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Effector
+  effectors(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Effector_orderBy
+    orderDirection: OrderDirection
+    where: Effector_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Effector!]!
+  peer(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Peer
+  peers(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Peer_orderBy
+    orderDirection: OrderDirection
+    where: Peer_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Peer!]!
+  computeUnit(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): ComputeUnit
+  computeUnits(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: ComputeUnit_orderBy
+    orderDirection: OrderDirection
+    where: ComputeUnit_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [ComputeUnit!]!
+  dealToEffector(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): DealToEffector
+  dealToEffectors(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: DealToEffector_orderBy
+    orderDirection: OrderDirection
+    where: DealToEffector_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [DealToEffector!]!
+  deal(
+    id: ID!
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): Deal
+  deals(
+    skip: Int = 0
+    first: Int = 100
+    orderBy: Deal_orderBy
+    orderDirection: OrderDirection
+    where: Deal_filter
+
+    """
+    The block at which the query should be executed. Can either be a `{ hash:
+    Bytes }` value containing a block hash, a `{ number: Int }` containing the
+    block number, or a `{ number_gte: Int }` containing the minimum block
+    number. In the case of `number_gte`, the query will be executed on the
+    latest block only if the subgraph has progressed to or past the minimum
+    block number. Defaults to the latest block when omitted.
+    """
+    block: Block_height
+
+    """
+    Set to `allow` to receive data even if the subgraph has skipped over errors while syncing.
+    """
+    subgraphError: _SubgraphErrorPolicy_! = deny
+  ): [Deal!]!
+
+  """Access to subgraph metadata"""
+  _meta(block: Block_height): _Meta_
+}
+
+type Token {
+  id: ID!
+  symbol: String!
+}
+
+input Token_filter {
+  id: ID
+  id_not: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  symbol: String
+  symbol_not: String
+  symbol_gt: String
+  symbol_lt: String
+  symbol_gte: String
+  symbol_lte: String
+  symbol_in: [String!]
+  symbol_not_in: [String!]
+  symbol_contains: String
+  symbol_contains_nocase: String
+  symbol_not_contains: String
+  symbol_not_contains_nocase: String
+  symbol_starts_with: String
+  symbol_starts_with_nocase: String
+  symbol_not_starts_with: String
+  symbol_not_starts_with_nocase: String
+  symbol_ends_with: String
+  symbol_ends_with_nocase: String
+  symbol_not_ends_with: String
+  symbol_not_ends_with_nocase: String
+
+  """Filter for the block changed event."""
+  _change_block: BlockChangedFilter
+  and: [Token_filter]
+  or: [Token_filter]
+}
+
+enum Token_orderBy {
+  id
+  symbol
+}
+

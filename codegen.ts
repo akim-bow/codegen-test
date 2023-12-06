@@ -10,7 +10,7 @@ const config: CodegenConfig = {
       plugins: ['typescript'],
       config: {
         scalars: {
-Fx          BigInt: 'string',
+          BigInt: 'string',
         },
       }
     },
